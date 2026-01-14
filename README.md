@@ -44,7 +44,11 @@ directus-multimode/
 - **Node.js** 18+ and npm
 - **Caddy** (optional, for reverse proxy with HTTPS)
   - macOS: `brew install caddy`
+  - macOS: `brew install caddy`
   - Linux: See [Caddy installation guide](https://caddyserver.com/docs/install)
+- **PM2** (optional but recommended)
+  - `npm install -g pm2`
+  - If not installed, the app will use `npx pm2` automatically (slower).
 
 ## 🚀 Quick Start
 
@@ -153,6 +157,11 @@ The application provides a REST API for management functions.
 ### Caddy issues
 - Ensure Caddy is installed and in your PATH.
 - Check the generated Caddyfile in `Caddyfile` for errors.
+
+### PM2 issues
+- The app uses a local PM2 instance stored in `data/.pm2`.
+- View logs: `npm run pm2:logs`
+- Kill all instances: `npm run pm2:stop`
 
 ## 📝 License
 
