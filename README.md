@@ -6,6 +6,8 @@ A powerful web-based management application that allows you to create, manage, a
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![Express](https://img.shields.io/badge/express-4.18.2-blue)
 
+![DirectusCloud Dashboard](screenshots/dashboard_all_instances.jpg)
+
 ## ✨ Features
 
 - **Multi-Instance Management**: Create and manage unlimited Directus instances
@@ -102,10 +104,26 @@ npm run dev
 4. The system will create a new Directus instance in the `instances/` directory.
 5. Once created, you can Start/Stop/Restart/Clone/Delete the instance from the dashboard cards.
 
+![Create Instance Modal](screenshots/create_new_instance_modal.jpg)
+*Creating a new instance*
+
+![Instance Progress](screenshots/instance_install_progress_end.jpg)
+*Real-time installation progress*
+
 ### Accessing Instances
 
 - **Direct Port**: Each instance runs on a unique port (assigned automatically).
 - **Subdomain**: If Caddy is configured, instances are accessible via `http://<subdomain>.localhost`.
+
+### Instance Actions
+
+Manage your instances directly from the dashboard card menu.
+
+![Instance Menu](screenshots/instance_card_kebab_menu.jpg)
+*Instance management menu*
+
+![Instance Cloning](screenshots/instance_cloning_progress.jpg)
+*Cloning an existing instance*
 
 ### Command Line Tools
 
