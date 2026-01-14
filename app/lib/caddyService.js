@@ -6,7 +6,7 @@ import instanceService from './instanceService.js';
 
 const execAsync = promisify(exec);
 const INSTANCES_DIR = process.env.INSTANCES_DIR || path.join(process.cwd(), 'instances');
-const DIRECTUS_CLOUD_DIR = process.env.DIRECTUS_CLOUD_DIR || path.join(process.env.HOME, 'directus-cloud');
+const DIRECTUS_CLOUD_DIR = process.env.DIRECTUS_CLOUD_DIR || process.cwd();//path.join(process.env.HOME, 'directus-cloud');
 
 class CaddyService {
     constructor() {
