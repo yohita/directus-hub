@@ -1,0 +1,32 @@
+{
+    "name": "directuscloud",
+    "version": "1.0.0",
+    "description": "DirectusCloud - Unified Multi-Instance Directus Hosting Platform",
+    "main": "app/server.js",
+    "type": "module",
+    "scripts": {
+        "dev": "node --watch app/server.js",
+        "start": "node app/server.js",
+        "build": "echo 'No build needed - server-side rendered'",
+        "stop": "./stop.sh",
+        "pm2:list": "PM2_HOME=./data/.pm2 npx pm2 list",
+        "pm2:stop": "PM2_HOME=./data/.pm2 npx pm2 stop all",
+        "pm2:logs": "PM2_HOME=./data/.pm2 npx pm2 logs"
+    },
+    "keywords": [
+        "directus",
+        "hosting",
+        "multi-instance"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2",
+        "better-sqlite3": "^9.2.2",
+        "dotenv": "^16.3.1",
+        "chokidar": "^3.5.3",
+        "axios": "^1.6.2",
+        "uuid": "^9.0.1",
+        "ejs": "^3.1.9"
+    }
+}

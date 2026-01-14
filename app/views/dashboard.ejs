@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DirectusCloud - Multi-Instance Manager</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2" />
+                            <path d="M8 12h8M12 8v8" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        <div class="logo-text">
+                            <h1>Directus Hub</h1>
+                            <p>Multi-Instance Manager</p>
+                        </div>
+                    </div>
+                    <button onclick="openCreateModal()" class="btn btn-primary">
+                        + Create Instance
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- System Checklist -->
+                <div class="system-checklist">
+                    <div class="checklist-header">
+                        <h2>System Status</h2>
+                        <% if (systemStatus.allOk) { %>
+                            <span class="checklist-badge checklist-ok">All Systems OK</span>
+                            <% } else { %>
+                                <span class="checklist-badge checklist-warn">Issues Detected</span>
+                                <% } %>
+                    </div>
+                    <div class="checklist-grid">
+                        <% systemStatus.checks.forEach(check=> { %>
+                            <div
+                                class="check-card <%= check.installed && (check.compatible === undefined || check.compatible) ? 'check-ok' : 'check-warn' %>">
+                                <div class="check-header">
+                                    <div class="check-icon">
+                                        <% if (check.installed && (check.compatible===undefined || check.compatible)) {
+                                            %>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <path d="M9 12l2 2 4-4" />
+                                            </svg>
+                                            <% } else { %>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                    <path d="M12 8v4M12 16h.01" />
+                                                </svg>
+                                                <% } %>
+                                    </div>
+                                    <div class="check-info">
+                                        <div class="check-title-group">
+                                            <h3>
+                                                <%= check.name %>
+                                            </h3>
+                                            <div class="check-badges">
+                                                <span
+                                                    class="mini-badge <%= check.installed ? 'status-ok' : 'status-error' %>">
+                                                    <%= check.installed ? '✓ Installed' : '✗ Installed' %>
+                                                </span>
+                                                <% if (check.running !==undefined) { %>
+                                                    <span
+                                                        class="mini-badge <%= check.running ? 'status-ok' : 'status-warn' %>">
+                                                        <%= check.running ? '✓ Running' : '✗ Running' %>
+                                                    </span>
+                                                    <% } %>
+                                                        <% if (check.compatible !==undefined) { %>
+                                                            <span
+                                                                class="mini-badge <%= check.compatible ? 'status-ok' : 'status-error' %>">
+                                                                <%= check.compatible ? '✓ Compatible' : '✗ Compatible'
+                                                                    %>
+                                                            </span>
+                                                            <% } %>
+                                            </div>
+                                        </div>
+                                        <% if (check.version) { %>
+                                            <p class="check-version">
+                                                <%= check.version %>
+                                            </p>
+                                            <% } %>
+                                    </div>
+                                </div>
+                                <% if (check.fixHelp) { %>
+                                    <div class="check-fix">
+                                        <p class="fix-label">How to fix:</p>
+                                        <p class="fix-text">
+                                            <%= check.fixHelp %>
+                                        </p>
+                                        <% if (check.fixCommand) { %>
+                                            <code class="fix-command"><%= check.fixCommand %></code>
+                                            <% } %>
+                                    </div>
+                                    <% } %>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+
+                <!-- Instances List -->
+                <div class="instances-section">
+                    <div class="section-header">
+                        <h2>All Instances</h2>
+                        <div class="stats-summary">
+                            <span class="stat-pill" title="Total Instances">
+                                <span class="stat-dot dot-blue"></span>
+                                <%= instances.length %> Total
+                            </span>
+                            <span class="stat-pill" title="Running Instances">
+                                <span class="stat-dot dot-green"></span>
+                                <%= instances.filter(i=> i.status === 'running').length %> Running
+                            </span>
+                            <span class="stat-pill" title="Stopped Instances">
+                                <span class="stat-dot dot-gray"></span>
+                                <%= instances.filter(i=> i.status === 'stopped').length %> Stopped
+                            </span>
+                        </div>
+                    </div>
+
+                    <% if (instances.length===0) { %>
+                        <div class="empty-state">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2" />
+                                <path d="M8 12h8M12 8v8" stroke-width="2" />
+                            </svg>
+                            <h3>No instances yet</h3>
+                            <p>Create your first Directus instance to get started</p>
+                            <button onclick="openCreateModal()" class="btn btn-primary btn-large">
+                                + Create First Instance
+                            </button>
+                        </div>
+                        <% } else { %>
+                            <div class="instances-grid">
+                                <% instances.forEach(instance=> { %>
+                                    <div class="instance-card" data-id="<%= instance.id %>">
+                                        <div class="instance-header">
+                                            <div class="instance-title-row">
+                                                <h3>
+                                                    <%= instance.name %>
+                                                </h3>
+                                                <span class="status-badge <%= instance.status %>">
+                                                    <%= instance.status %>
+                                                </span>
+
+                                                <div class="instance-quick-links">
+                                                    <% if (instance.status==='running' ) { %>
+                                                        <a href="http://localhost:<%= instance.port %>" target="_blank"
+                                                            class="link-item" title="Open Local">
+                                                            <svg viewBox="0 0 24 24" width="14" height="14"
+                                                                stroke="currentColor" stroke-width="2" fill="none">
+                                                                <path
+                                                                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                                </path>
+                                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                            </svg>
+                                                            Local
+                                                        </a>
+                                                        <% if (instance.custom_domain) { %>
+                                                            <a href="https://<%= instance.custom_domain %>"
+                                                                target="_blank" class="link-item" title="Open External">
+                                                                <svg viewBox="0 0 24 24" width="14" height="14"
+                                                                    stroke="currentColor" stroke-width="2" fill="none">
+                                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                                    <path
+                                                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                                                    </path>
+                                                                </svg>
+                                                                External
+                                                            </a>
+                                                            <% } %>
+                                                                <% } %>
+                                                </div>
+                                            </div>
+
+                                            <div class="instance-menu-container">
+                                                <button class="btn-icon menu-trigger"
+                                                    onclick="toggleInstanceMenu('<%= instance.id %>')">
+                                                    <svg viewBox="0 0 24 24" width="20" height="20"
+                                                        stroke="currentColor" stroke-width="2" fill="none">
+                                                        <circle cx="12" cy="12" r="1"></circle>
+                                                        <circle cx="12" cy="5" r="1"></circle>
+                                                        <circle cx="12" cy="19" r="1"></circle>
+                                                    </svg>
+                                                </button>
+                                                <div id="menu-<%= instance.id %>" class="instance-menu-dropdown">
+                                                    <% if (instance.status==='running' ) { %>
+                                                        <button class="menu-item"
+                                                            onclick="restartInstance('<%= instance.id %>')">
+                                                            <span class="menu-icon">↻</span> Restart
+                                                        </button>
+                                                        <button class="menu-item text-danger"
+                                                            onclick="stopInstance('<%= instance.id %>')">
+                                                            <span class="menu-icon">⏹</span> Stop
+                                                        </button>
+                                                        <% } else { %>
+                                                            <button class="menu-item text-success"
+                                                                onclick="startInstance('<%= instance.id %>')">
+                                                                <span class="menu-icon">▶</span> Start
+                                                            </button>
+                                                            <% } %>
+                                                                <hr
+                                                                    style="border: 0; border-top: 1px solid #eee; margin: 4px 0;">
+                                                                <button class="menu-item" <%=instance.status==='running'
+                                                                    ? 'disabled' : '' %>
+                                                                    onclick="cloneInstance('<%= instance.id %>', '<%=
+                                                                            instance.name %>')">
+                                                                            <span class="menu-icon">⎘</span> Clone
+                                                                </button>
+                                                                <button class="menu-item text-danger"
+                                                                    <%=instance.status==='running' ? 'disabled' : '' %>
+                                                                    onclick="deleteInstance('<%= instance.id %>', '<%=
+                                                                            instance.name %>')">
+                                                                            <span class="menu-icon">🗑</span> Delete
+                                                                </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="subdomain-text">
+                                            <%= instance.subdomain %>.localhost
+                                        </p>
+
+                                        <div class="instance-details">
+                                            <div class="detail-row two-col">
+                                                <div class="col-item">
+                                                    <span class="detail-label">Port:</span>
+                                                    <span class="detail-value">
+                                                        <%= instance.port %>
+                                                    </span>
+                                                </div>
+                                                <div class="col-item">
+                                                    <span class="detail-label">Database:</span>
+                                                    <span class="detail-value">
+                                                        <%= instance.database_type %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="detail-row content-row">
+                                                <span class="detail-label">Email:</span>
+                                                <span class="detail-value">
+                                                    <%= instance.admin_email %>
+                                                </span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="detail-label">Password:</span>
+                                                <span class="detail-value password">
+                                                    <span class="password-hidden">••••••••</span>
+                                                    <span class="password-revealed" style="display:none;">
+                                                        <%= instance.admin_password %>
+                                                    </span>
+                                                    <button class="btn-icon" onclick="togglePassword(this)">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+                                                            <circle cx="12" cy="12" r="3" />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="detail-label">API Key:</span>
+                                                <span class="detail-value monospace">
+                                                    *****<%= instance.api_key.slice(-10) %>
+                                                </span>
+                                            </div>
+                                            <div class="detail-row">
+                                                <span class="detail-label">MCP:</span>
+                                                <label class="toggle">
+                                                    <input type="checkbox" <%=instance.mcp_enabled ? 'checked' : '' %>
+                                                    onchange="toggleMCP('<%= instance.id %>', this.checked)">
+                                                        <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Instance Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Instance</h2>
+                <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+            </div>
+            <form id="createForm" onsubmit="createInstance(event)">
+                <div class="form-group">
+                    <label>Instance Name *</label>
+                    <input type="text" name="name" placeholder="My Blog" required>
+                </div>
+                <div class="form-group">
+                    <label>Subdomain *</label>
+                    <input type="text" name="subdomain" placeholder="my-blog" required pattern="[a-z0-9-]+">
+                    <small>Only lowercase letters, numbers, and hyphens</small>
+                </div>
+                <div class="form-group">
+                    <label>Custom Domain (Optional)</label>
+                    <input type="text" name="custom_domain" placeholder="example.com">
+                    <small>Point A record to server IP before adding</small>
+                </div>
+                <div class="form-group">
+                    <label>Database Type</label>
+                    <select name="databaseType">
+                        <option value="sqlite">SQLite (Recommended)</option>
+                        <option value="postgres">PostgreSQL</option>
+                        <option value="mysql">MySQL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Storage Adapter</label>
+                    <select name="storageAdapter" id="storageAdapterSelect" onchange="toggleStorageFields()">
+                        <option value="local">Local Filesystem</option>
+                        <option value="s3">S3 / S3 Compatible</option>
+                    </select>
+                </div>
+
+                <!-- S3 Configuration Fields (Hidden by default) -->
+                <div id="s3Fields" style="display: none;">
+                    <div class="form-group">
+                        <label>S3 Key *</label>
+                        <input type="text" name="s3Key" placeholder="AKIA...">
+                    </div>
+                    <div class="form-group">
+                        <label>S3 Secret *</label>
+                        <input type="password" name="s3Secret" placeholder="Secret Key">
+                    </div>
+                    <div class="form-group">
+                        <label>Bucket Name *</label>
+                        <input type="text" name="s3Bucket" placeholder="my-bucket">
+                    </div>
+                    <div class="form-group">
+                        <label>Region *</label>
+                        <input type="text" name="s3Region" placeholder="us-east-1">
+                    </div>
+                    <div class="form-group">
+                        <label>Endpoint (Optional)</label>
+                        <input type="text" name="s3Endpoint"
+                            placeholder="s3.amazonaws.com or output of MinIO/DO Spaces">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Admin Email *</label>
+                    <input type="email" name="adminEmail" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Admin Password *</label>
+                    <input type="password" name="adminPassword" placeholder="Minimum 8 characters" required
+                        minlength="8">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary btn-large">Create Instance</button>
+                    <button type="button" class="btn btn-large" onclick="closeCreateModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clone Instance Modal -->
+    <div id="cloneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Clone Instance</h2>
+                <button class="modal-close" onclick="closeCloneModal()">&times;</button>
+            </div>
+            <form id="cloneForm" onsubmit="submitClone(event)">
+                <input type="hidden" name="sourceId" id="cloneSourceId">
+                <div class="form-group">
+                    <label>New Instance Name *</label>
+                    <input type="text" name="name" id="cloneName" placeholder="My Blog - Copy" required>
+                </div>
+                <div class="form-group">
+                    <label>New Subdomain *</label>
+                    <input type="text" name="subdomain" id="cloneSubdomain" placeholder="my-blog-copy" required
+                        pattern="[a-z0-9-]+">
+                    <small>Only lowercase letters, numbers, and hyphens</small>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary btn-large">Clone Instance</button>
+                    <button type="button" class="btn btn-large" onclick="closeCloneModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progressModal" class="modal progress-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="progressTitle">Creating Instance...</h2>
+            </div>
+            <div class="progress-content">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+                <div class="progress-message" id="progressMessage">Initializing...</div>
+                <div class="progress-steps">
+                    <div class="step" data-step="validate">
+                        <div class="step-icon">⏳</div>
+                        <div class="step-label">Validating</div>
+                    </div>
+                    <div class="step" data-step="prepare">
+                        <div class="step-icon">📦</div>
+                        <div class="step-label">Preparing</div>
+                    </div>
+                    <div class="step" data-step="install">
+                        <div class="step-icon">⬇️</div>
+                        <div class="step-label">Installing</div>
+                    </div>
+                    <div class="step" data-step="setup">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-label">Setup</div>
+                    </div>
+                    <div class="step" data-step="complete">
+                        <div class="step-icon">✅</div>
+                        <div class="step-label">Complete</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+
+</html>
